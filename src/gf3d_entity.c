@@ -1,8 +1,8 @@
 
-#include "simple_logger.h""
+#include "simple_logger.h"
 
 #include "gf3d_entity.h"
-
+#include "gf3d_player.h"
 
 typedef struct
 {
@@ -14,18 +14,19 @@ static EntityManager gf3d_entity = {0};
 void gf3d_entity_free(Entity *entity);
 
 
-void gf3d_entity_close()
+void gf3d_entity_close( void )
 {
 	int i;
 	if (gf3d_entity.entity_list != NULL)
 	{
-		for (i = 0; i < gf3d_entity.entity_list; i++)
+		for (i = 0; i < (int)gf3d_entity.entity_count; i++)
 		{
 			gf3d_entity_free(&gf3d_entity.entity_list[i]);
 		}
 		free(gf3d_entity.entity_list);
 	}
-	memset(gf3d_entity, 0, sizeof(EntityManager));
+	memset(&gf3d_entity, 0, sizeof(EntityManager));
+	slog("Entity System Closed, pog, I suppose.");
 }
 
 void gf3d_entity_init(Uint32 maxEntities)
@@ -40,7 +41,9 @@ void gf3d_entity_init(Uint32 maxEntities)
 	{
 		slog("failed to allocate big ole entity list");
 	}
-	gf3d_entity.entity_count
+	gf3d_entity.entity_count = maxEntities;
+	atexit(gf3d_entity_close);
+	slog("Entity System Initialized, POG!");
 }
 
 void gf3d_entity_free(Entity *entity)
@@ -53,15 +56,72 @@ void gf3d_entity_free(Entity *entity)
 Entity *gf3d_entity_new()
 {
 	int i;
-	for (i = 0; i < gf3d_entity.entity_count; i++)
+	for (i = 0; i < (int) gf3d_entity.entity_count; i++)
 	{
 		if (!gf3d_entity.entity_list[i]._inuse)
 		{
 			gf3d_entity.entity_list[i]._inuse = 1;
-			return &gf3d_entity.entity_list[i]._inuse;
+			gfc_matrix_identity(gf3d_entity.entity_list[i].modelMatrix);
+			gf3d_entity.entity_list[i].x = 0;
+			gf3d_entity.entity_list[i].y = 0;
+			gf3d_entity.entity_list[i].z = 0;
+			gf3d_entity.entity_list[i].nx = 0;
+			gf3d_entity.entity_list[i].ny = 0;
+			gf3d_entity.entity_list[i].nz = 0;
+			return &gf3d_entity.entity_list[i];
 		}
 	}
 	slog("Failed to provide new entity, no unused slots");
+	return NULL;
 }
-
+void gf3d_entity_think(Entity *self)
+{
+	if (!self)return;
+	if (!self->think)return;//no think function to call
+	self->think(self);
+}
+void gf3d_entity_think_all()
+{
+	int i;
+	for (i = 0; i < (int)gf3d_entity.entity_count; i++)
+	{
+		if (!gf3d_entity.entity_list[i]._inuse)continue;
+		gf3d_entity_think(&gf3d_entity.entity_list[i]);
+	}
+}
+void gf3d_entity_set_colliders(Entity *self, float cx, float cy, float cz, float cnx, float cny, float cnz)
+{
+	self->x = self->modelMatrix[3][0] + cx;
+	self->y = self->modelMatrix[3][1] + cy;
+	self->z = self->modelMatrix[3][2] + cz;
+	self->nx = self->modelMatrix[3][0] - cnx;
+	self->ny = self->modelMatrix[3][1] - cny;
+	self->nz = self->modelMatrix[3][2] - cnz;
+}
+void gf3d_collision_think(Entity *self, Entity *player)
+{
+	if (!self)return;
+	if (self->nx < player->x && self->x > player->nx && self->ny < player->y && self->y > player->ny && self->nz < player->z && self->z > player->nz)
+	{
+		gf3d_player_grounded();
+	}
+	else
+	{
+		gf3d_player_air();
+	}
+}
+void gf3d_entity_draw(Entity *self, Uint32 bufferFrame, VkCommandBuffer commandBuffer)
+{
+	if (!self)return;
+	gf3d_model_draw(self->model, bufferFrame, commandBuffer, self->modelMatrix);
+}
+void gf3d_entity_draw_all(Uint32 bufferFrame, VkCommandBuffer commandBuffer)
+{
+	int i;
+	for (i = 0; i < (int)gf3d_entity.entity_count; i++)
+	{
+		if (!gf3d_entity.entity_list[i]._inuse)continue;
+		gf3d_entity_draw(&gf3d_entity.entity_list[i], bufferFrame, commandBuffer);
+	}
+}
 /*eol@oef*/

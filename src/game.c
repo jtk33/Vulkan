@@ -11,21 +11,20 @@
 #include "gf3d_camera.h"
 #include "gf3d_texture.h"
 #include "gf3d_entity.h"
+#include "gf3d_player.h"
 
+#include "SDL_keycode.h"
+#include "SDL_events.h"
 int main(int argc,char *argv[])
 {
     int done = 0;
-    int a;
+    int a, i;
     Uint8 validate = 0;
     const Uint8 * keys;
     Uint32 bufferFrame = 0;
     VkCommandBuffer commandBuffer;
-    Model *model;
-    Matrix4 modelMat;
-    Model *model2;
-    Matrix4 modelMat2;
-	Entity *ent1 = NULL;
-    
+	Entity *ent[10] = { 0 };
+	Matrix4 *view;
     for (a = 1; a < argc;a++)
     {
         if (strcmp(argv[a],"-disable_validate") == 0)
@@ -40,41 +39,77 @@ int main(int argc,char *argv[])
         "gf3d",                 //program name
         1200,                   //screen width
         700,                    //screen height
-        vector4d(1,1,1,1),//background color
+        vector4d(1,1,1,1),		//background color
         0,                      //fullscreen
         validate                //validation
     );
 	slog_sync();
-	gf3d_entity_init(1028);
+	gf3d_entity_init(256);
 
     // main game loop
     slog("gf3d main loop begin");
 	slog_sync();
-	model = gf3d_model_load("dino");
-	gfc_matrix_identity(modelMat);
-	model2 = gf3d_model_load("dino");
-    gfc_matrix_identity(modelMat2);
-    gfc_matrix_make_translation(
-            modelMat2,
-            vector3d(10,0,0)
-        );
+	ent[0] = gf3d_entity_new();
+	ent[0]->model = gf3d_model_load("robo");
+	ent[0]->think = gf3d_player_think;
+	gf3d_entity_set_colliders(ent[0], (float)0.5, (float)0.3, (float)3.2, (float)0.72, (float)0.5, (float)0);
+	ent[0]->modelMatrix[3][2] = 5;
+
+	ent[1] = gf3d_entity_new();
+	ent[1]->model = gf3d_model_load("base");
+	gf3d_entity_set_colliders(ent[1], (float)25, (float)25, (float)0.5, (float)25, (float)25, (float)0.5);
+	for (i = 2; i < 10; i++)
+	{
+		ent[i] = gf3d_entity_new();
+		if (!ent[i])continue;
+		ent[i]->model = gf3d_model_load("dino");
+		gfc_matrix_make_translation(
+			ent[i]->modelMatrix,
+			vector3d(gfc_crandom() * 20, gfc_crandom() * 20, gfc_crandom() * 20));
+		gfc_matrix_rotate(
+			ent[i]->modelMatrix,
+			ent[i]->modelMatrix,
+			gfc_crandom()*0.01,
+			vector3d(1, 0, 0));
+	}
+	gf3d_player_init();
+	gfc_matrix_rotate(
+		ent[0]->modelMatrix,
+		ent[0]->modelMatrix,
+		(float)1.5708,
+		vector3d(1, 0, 0));
+	gfc_matrix_rotate(
+		ent[1]->modelMatrix,
+		ent[1]->modelMatrix,
+		(float)1.5708,
+		vector3d(1, 0, 0));
+	//view = gf3d_vgraphics_get_view();
+
     while(!done)
     {
         SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         //update game things here
-        
-        gf3d_vgraphics_rotate_camera((float)0.001);
-        gfc_matrix_rotate(
-            modelMat,
-            modelMat,
-            (float)0.002,
-            vector3d(1,0,0));
-        gfc_matrix_rotate(
-            modelMat2,
-            modelMat2,
-            (float)0.002,
-            vector3d(0,0,1));
+
+		gf3d_entity_think_all();
+		gf3d_camera_think(ent[0]);
+		gf3d_collision_think(ent[1], ent[0]);
+
+		/*gfc_matrix_view(
+			view,
+			vector3d(*view[3][0], ent[0]->modelMatrix[3][1] + 9, ent[0]->modelMatrix[3][2] + 5),
+			vector3d(ent[0]->modelMatrix[3][0], ent[0]->modelMatrix[3][1], ent[0]->modelMatrix[3][2] + 3.6),
+			vector3d(0, 0, 1));*/
+		//gfc_matrix_copy(gf3d_vgraphics_get_view, view);
+		//gfc_matrix_slog(ent[0]->modelMatrix);
+		for (i = 2; i < 10; i++)
+		{
+			gfc_matrix_rotate(
+				ent[i]->modelMatrix,
+				ent[i]->modelMatrix,
+				(float)0.002,
+				vector3d(1, 0, 0));
+		}
 
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool

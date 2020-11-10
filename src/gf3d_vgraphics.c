@@ -23,6 +23,9 @@
 #include "gf3d_pipeline.h"
 #include "gf3d_commands.h"
 #include "gf3d_texture.h"
+#include "gf3d_entity.h"
+
+#include "SDL_keycode.h"
 
 
 typedef struct
@@ -66,6 +69,8 @@ typedef struct
     UniformBufferObject         ubo;
 }vGraphics;
 
+const Uint8 * keys;
+
 static vGraphics gf3d_vgraphics = {0};
 
 extern Mesh *testMesh;
@@ -101,14 +106,15 @@ void gf3d_vgraphics_init(
 )
 {
     VkDevice device;
-    
+	keys = SDL_GetKeyboardState(NULL);
+
     gfc_matrix_identity(gf3d_vgraphics.ubo.model);
     gfc_matrix_identity(gf3d_vgraphics.ubo.view);
     gfc_matrix_identity(gf3d_vgraphics.ubo.proj);
     gfc_matrix_view(
         gf3d_vgraphics.ubo.view,
-        vector3d(2,40,2),
-        vector3d(0,0,0),
+        vector3d(2,10,2),
+        vector3d(0,0,3.6),
         vector3d(0,0,1)
     );
     gfc_matrix_perspective(
@@ -116,7 +122,7 @@ void gf3d_vgraphics_init(
         45 * GFC_DEGTORAD,
         renderWidth/(float)renderHeight,
         0.1f,
-        100
+        1000
     );
     
     gf3d_vgraphics.ubo.proj[1][1] *= -1;
@@ -657,7 +663,27 @@ uint32_t gf3d_vgraphics_find_memory_type(uint32_t typeFilter, VkMemoryPropertyFl
     return 0;
 }
 
-void gf3d_vgraphics_rotate_camera(float degrees)
+void gf3d_vgraphics_rotate_camera_x(double degrees)
+{
+	gfc_matrix_rotate(
+		gf3d_vgraphics.ubo.view,
+		gf3d_vgraphics.ubo.view,
+		degrees,
+		vector3d(1, 0, 0));
+
+}
+
+void gf3d_vgraphics_rotate_camera_y(double degrees)
+{
+	gfc_matrix_rotate(
+		gf3d_vgraphics.ubo.view,
+		gf3d_vgraphics.ubo.view,
+		degrees,
+		vector3d(0, 1, 0));
+
+}
+
+void gf3d_vgraphics_rotate_camera_z(double degrees)
 {
     gfc_matrix_rotate(
         gf3d_vgraphics.ubo.view,
@@ -665,6 +691,63 @@ void gf3d_vgraphics_rotate_camera(float degrees)
         degrees,
         vector3d(0,0,1));
 
+}
+
+void gf3d_vgraphics_translate_camera_x(double distance)
+{
+	gfc_matrix_translate(
+		gf3d_vgraphics.ubo.view,
+		vector3d(distance, 0, 0));
+
+}
+
+void gf3d_vgraphics_translate_camera_y(double distance)
+{
+	gfc_matrix_translate(
+		gf3d_vgraphics.ubo.view,
+		vector3d(0, distance, 0));
+
+}
+
+void gf3d_vgraphics_translate_camera_z(double distance)
+{
+	gfc_matrix_translate(
+		gf3d_vgraphics.ubo.view,
+		vector3d(0, 0, distance));
+	/*gfc_matrix_view(
+		gf3d_vgraphics.ubo.view,
+		vector3d(2, 40, 2),
+		vector3d(0, 3, 0),
+		vector3d(0, 0, 1)
+		);*/
+
+}
+void gf3d_camera_think(Entity *self)
+{
+	/*if (keys[SDL_SCANCODE_D] && keys[SDL_SCANCODE_A])
+	{
+		gfc_matrix_view(
+			gf3d_vgraphics.ubo.view,
+			vector3d(gf3d_vgraphics.ubo.view[3][0], self->modelMatrix[3][1] + 9, self->modelMatrix[3][2] + 5),
+			vector3d(self->modelMatrix[3][0], self->modelMatrix[3][1], self->modelMatrix[3][2] + 3.6),
+			vector3d(0, 0, 1));
+	}
+	else if (keys[SDL_SCANCODE_A])
+	{
+		gf3d_vgraphics_rotate_camera_z((float)-0.01);
+	}
+	else if (keys[SDL_SCANCODE_D])
+	{
+		gf3d_vgraphics_rotate_camera_z((float)0.01);
+	}
+	else*/
+	//{
+		gfc_matrix_view(
+			gf3d_vgraphics.ubo.view,
+			vector3d(self->modelMatrix[3][0], self->modelMatrix[3][1] + 9, self->modelMatrix[3][2] + 5),
+			vector3d(self->modelMatrix[3][0], self->modelMatrix[3][1], self->modelMatrix[3][2] + 3.6),
+			vector3d(0, 0, 1));
+	//}
 }
 
 Pipeline *gf3d_vgraphics_get_graphics_pipeline()
@@ -682,6 +765,10 @@ UniformBufferObject gf3d_vgraphics_get_uniform_buffer_object()
     return gf3d_vgraphics.ubo;
 }
 
+void gf3d_vgraphics_get_view()
+{
+	return gf3d_vgraphics.ubo.view;
+}
 VkImageView gf3d_vgraphics_create_image_view(VkImage image, VkFormat format)
 {
     VkImageView imageView;
