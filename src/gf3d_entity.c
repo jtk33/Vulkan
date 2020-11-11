@@ -13,7 +13,8 @@ typedef struct
 static EntityManager gf3d_entity = {0};
 void gf3d_entity_free(Entity *entity);
 float collidercount = 3;
-
+float relook = 1;
+float hostile = 0;
 void gf3d_entity_close( void )
 {
 	int i;
@@ -148,6 +149,36 @@ void collision_detect(Entity *self, Entity *other)
 	if (self->y > other->ny - 0.1)
 	{
 		other->canny = no;
+	}
+}
+void gf3d_detector_think(Entity *self, Entity *other)
+{
+	if (!self)return;
+	relook -= 0.0005;
+	
+	if (self->nx < other->x && self->x > other->nx && self->ny < other->y && self->y > other->ny && self->nz < other->z && self->z > other->nz)
+	{
+		if ((gfc_crandom() + 1) * 100 < gf3d_detection() && relook <= 0)
+		{
+			relook = 1;
+			if (hostile == 0)
+			{
+				//gf3d_model_delete(self->model);
+				self->model = gf3d_model_load("detectorr");
+				hostile = 1;
+			}
+			
+		}
+	}
+	else if (hostile == 1 && relook <= 0)
+	{
+		self->model = gf3d_model_load("detectorg");
+		hostile = 0;
+	}
+	
+	if (relook <= 0)
+	{
+		relook = 1;
 	}
 }
 void gf3d_entity_draw(Entity *self, Uint32 bufferFrame, VkCommandBuffer commandBuffer)

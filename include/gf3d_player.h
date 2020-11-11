@@ -18,5 +18,5 @@ void gf3d_player_think(Entity *self);
 
 void gf3d_player_grounded();
 void gf3d_player_air();
-
+float gf3d_detection();
 #endif

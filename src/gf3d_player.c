@@ -21,7 +21,7 @@ typedef struct
 	float gravity;			/**Player gravity.*/
 	enum state grounded;	/**Is the player on the ground?*/
 	float tpdistance;		/**Teleportation distance*/
-	//float flightspeed;		/**Like speed, but upwards*/
+	float detection;		/**% Chance of being detected at every frame*/
 }Player;
 Player player;
 const Uint8 * keys;
@@ -69,27 +69,27 @@ void gf3d_player_think(Entity *self)
 	gf3d_entity_set_colliders(self, (float)0.5, (float)0.3, (float)3.2, (float)0.72, (float)0.5, (float)0);
 	if (player.form == platformer)
 	{
-		
+		player.detection = 100;
 	}
 	if (player.form == stealth)
 	{
-
+		player.detection = 50;
 	}
 	if (player.crouch == yes)
 	{
-
+		player.detection = 20;
 	}
-	if (player.crouch == yes)
+	if (player.prone == yes)
 	{
-
+		player.detection = 5;
 	}
-	if (player.crouch == yes)
+	if (player.boxxed == yes)
 	{
-
+		player.detection = 1;
 	}
-	if (player.crouch == yes)
+	if (player.cloaking == yes)
 	{
-
+		player.detection = 0;
 	}
 	/*if (self->modelMatrix[3][2] <= 0)
 	{
@@ -411,11 +411,13 @@ void gf3d_player_think(Entity *self)
 					player.boxxed = yes;
 					player.cloaking = no;
 					self->model = gf3d_model_load("box");
+					player.speed = 0;
 				}
 				else if (player.boxxed == yes)
 				{
 					player.boxxed = no;
 					self->model = gf3d_model_load("robo");
+					player.speed = originspeed * 0.5;
 				}
 			}
 		}
@@ -470,4 +472,8 @@ void gf3d_player_grounded()
 void gf3d_player_air()
 {
 	player.grounded = no;
+}
+float gf3d_detection()
+{
+	return player.detection;
 }

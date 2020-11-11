@@ -78,21 +78,7 @@ int main(int argc,char *argv[])
 	gfc_matrix_make_translation(
 		ent[5]->modelMatrix,
 		vector3d(-20, -10, 2));
-	gf3d_entity_set_colliders(ent[5], (float)2, (float)2, (float)0.5, (float)2, (float)2, (float)0.5);
-	for (i = 5; i < 10; i++)
-	{
-		ent[i] = gf3d_entity_new();
-		if (!ent[i])continue;
-		ent[i]->model = gf3d_model_load("dino");
-		gfc_matrix_make_translation(
-			ent[i]->modelMatrix,
-			vector3d(gfc_crandom() * 20, gfc_crandom() * 20, gfc_crandom() * 20));
-		gfc_matrix_rotate(
-			ent[i]->modelMatrix,
-			ent[i]->modelMatrix,
-			gfc_crandom()*0.01,
-			vector3d(1, 0, 0));
-	}
+	gf3d_entity_set_colliders(ent[5], (float)2, (float)2, (float)2, (float)2, (float)2, (float)2);
 	gf3d_player_init();
 	gfc_matrix_rotate(
 		ent[0]->modelMatrix,
@@ -123,12 +109,13 @@ int main(int argc,char *argv[])
         SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
         //update game things here
-
 		gf3d_entity_think_all();
 		gf3d_camera_think(ent[0]);
 		gf3d_collision_think(ent[2], ent[0]);
 		gf3d_collision_think(ent[3], ent[0]);
 		gf3d_collision_think(ent[4], ent[0]);
+		gf3d_detector_think(ent[5], ent[0]);
+
 
 		/*gfc_matrix_view(
 			view,
@@ -137,14 +124,7 @@ int main(int argc,char *argv[])
 			vector3d(0, 0, 1));*/
 		//gfc_matrix_copy(gf3d_vgraphics_get_view, view);
 		//gfc_matrix_slog(ent[0]->modelMatrix);
-		for (i = 5; i < 10; i++)
-		{
-			gfc_matrix_rotate(
-				ent[i]->modelMatrix,
-				ent[i]->modelMatrix,
-				(float)0.002,
-				vector3d(1, 0, 0));
-		}
+
 
         // configure render command for graphics command pool
         // for each mesh, get a command and configure it from the pool
