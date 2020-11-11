@@ -37,8 +37,8 @@ int main(int argc,char *argv[])
     slog("gf3d begin");
     gf3d_vgraphics_init(
         "gf3d",                 //program name
-        1200,                   //screen width
-        700,                    //screen height
+        1600,                   //screen width
+        900,                    //screen height
         vector4d(1,1,1,1),		//background color
         0,                      //fullscreen
         validate                //validation
@@ -54,11 +54,32 @@ int main(int argc,char *argv[])
 	ent[0]->think = gf3d_player_think;
 	gf3d_entity_set_colliders(ent[0], (float)0.5, (float)0.3, (float)3.2, (float)0.72, (float)0.5, (float)0);
 	ent[0]->modelMatrix[3][2] = 5;
-
+	ent[0]->modelMatrix[3][0] = 0;
+	ent[0]->modelMatrix[3][0] = 0;
 	ent[1] = gf3d_entity_new();
-	ent[1]->model = gf3d_model_load("base");
-	gf3d_entity_set_colliders(ent[1], (float)25, (float)25, (float)0.5, (float)25, (float)25, (float)0.5);
-	for (i = 2; i < 10; i++)
+	ent[1]->model = gf3d_model_load("skybox");
+	ent[2] = gf3d_entity_new();
+	ent[2]->model = gf3d_model_load("base");
+	gf3d_entity_set_colliders(ent[2], (float)25, (float)25, (float)0.5, (float)25, (float)25, (float)0.5);
+	ent[3] = gf3d_entity_new();
+	ent[3]->model = gf3d_model_load("platform1");
+	gfc_matrix_make_translation(
+		ent[3]->modelMatrix,
+		vector3d(20, -50, 0));
+	gf3d_entity_set_colliders(ent[3], (float)2, (float)2, (float)0.5, (float)2, (float)2, (float)0.5);
+	ent[4] = gf3d_entity_new();
+	ent[4]->model = gf3d_model_load("platform1");
+	gfc_matrix_make_translation(
+		ent[4]->modelMatrix,
+		vector3d(-20, -50, 0));
+	gf3d_entity_set_colliders(ent[4], (float)2, (float)2, (float)0.5, (float)2, (float)2, (float)0.5);
+	ent[5] = gf3d_entity_new();
+	ent[5]->model = gf3d_model_load("detectorg");
+	gfc_matrix_make_translation(
+		ent[5]->modelMatrix,
+		vector3d(-20, -10, 2));
+	gf3d_entity_set_colliders(ent[5], (float)2, (float)2, (float)0.5, (float)2, (float)2, (float)0.5);
+	for (i = 5; i < 10; i++)
 	{
 		ent[i] = gf3d_entity_new();
 		if (!ent[i])continue;
@@ -79,10 +100,22 @@ int main(int argc,char *argv[])
 		(float)1.5708,
 		vector3d(1, 0, 0));
 	gfc_matrix_rotate(
-		ent[1]->modelMatrix,
-		ent[1]->modelMatrix,
+		ent[2]->modelMatrix,
+		ent[2]->modelMatrix,
 		(float)1.5708,
 		vector3d(1, 0, 0));
+	gfc_matrix_rotate(
+		ent[3]->modelMatrix,
+		ent[3]->modelMatrix,
+		(float)1.5708,
+		vector3d(1, 0, 0));
+	gfc_matrix_rotate(
+		ent[4]->modelMatrix,
+		ent[4]->modelMatrix,
+		(float)1.5708,
+		vector3d(1, 0, 0));
+
+
 	//view = gf3d_vgraphics_get_view();
 
     while(!done)
@@ -93,7 +126,9 @@ int main(int argc,char *argv[])
 
 		gf3d_entity_think_all();
 		gf3d_camera_think(ent[0]);
-		gf3d_collision_think(ent[1], ent[0]);
+		gf3d_collision_think(ent[2], ent[0]);
+		gf3d_collision_think(ent[3], ent[0]);
+		gf3d_collision_think(ent[4], ent[0]);
 
 		/*gfc_matrix_view(
 			view,
@@ -102,7 +137,7 @@ int main(int argc,char *argv[])
 			vector3d(0, 0, 1));*/
 		//gfc_matrix_copy(gf3d_vgraphics_get_view, view);
 		//gfc_matrix_slog(ent[0]->modelMatrix);
-		for (i = 2; i < 10; i++)
+		for (i = 5; i < 10; i++)
 		{
 			gfc_matrix_rotate(
 				ent[i]->modelMatrix,

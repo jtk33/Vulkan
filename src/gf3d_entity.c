@@ -12,7 +12,7 @@ typedef struct
 
 static EntityManager gf3d_entity = {0};
 void gf3d_entity_free(Entity *entity);
-
+float collidercount = 3;
 
 void gf3d_entity_close( void )
 {
@@ -68,6 +68,10 @@ Entity *gf3d_entity_new()
 			gf3d_entity.entity_list[i].nx = 0;
 			gf3d_entity.entity_list[i].ny = 0;
 			gf3d_entity.entity_list[i].nz = 0;
+			gf3d_entity.entity_list[i].canx = yes;
+			gf3d_entity.entity_list[i].cany = yes;
+			gf3d_entity.entity_list[i].cannx = yes;
+			gf3d_entity.entity_list[i].canny = yes;
 			return &gf3d_entity.entity_list[i];
 		}
 	}
@@ -98,16 +102,52 @@ void gf3d_entity_set_colliders(Entity *self, float cx, float cy, float cz, float
 	self->ny = self->modelMatrix[3][1] - cny;
 	self->nz = self->modelMatrix[3][2] - cnz;
 }
-void gf3d_collision_think(Entity *self, Entity *player)
+
+void gf3d_collision_think(Entity *self, Entity *other)
 {
 	if (!self)return;
-	if (self->nx < player->x && self->x > player->nx && self->ny < player->y && self->y > player->ny && self->nz < player->z && self->z > player->nz)
+
+	if (self->nx < other->x && self->x > other->nx && self->ny < other->y && self->y > other->ny && self->nz < other->z && self->z > other->nz)
 	{
+		collidercount = 3;
 		gf3d_player_grounded();
 	}
 	else
 	{
-		gf3d_player_air();
+		collidercount -= 1;
+		if (collidercount <= 0)
+		{
+			gf3d_player_air();
+			other->canx = yes;
+			other->cany = yes;
+			other->cannx = yes;
+			other->canny = yes;
+		}
+		
+	}
+	if (self->nx < other->x && self->x > other->nx && self->ny < other->y && self->y > other->ny && self->nz < other->z && self->z > other->nz && self->z > other->nz + 0.1)
+	{
+		collision_detect(self, other);
+	}
+
+}
+void collision_detect(Entity *self, Entity *other)
+{
+	if (self->nx < other->x + 0.1)
+	{
+		other->canx = no;
+	}
+	if (self->x > other->nx - 0.1)
+	{
+		other->cannx = no;
+	}
+	if (self->ny < other->y + 0.1)
+	{
+		other->cany = no;
+	}
+	if (self->y > other->ny - 0.1)
+	{
+		other->canny = no;
 	}
 }
 void gf3d_entity_draw(Entity *self, Uint32 bufferFrame, VkCommandBuffer commandBuffer)
