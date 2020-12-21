@@ -136,6 +136,7 @@
     <ClCompile Include="..\gfc\src\gfc_types.c" />
     <ClCompile Include="..\gfc\src\gfc_vector.c" />
     <ClCompile Include="..\src\game.c" />
+    <ClCompile Include="..\src\gf3d_boss.c" />
     <ClCompile Include="..\src\gf3d_camera.c" />
     <ClCompile Include="..\src\gf3d_commands.c" />
     <ClCompile Include="..\src\gf3d_enemy.c" />

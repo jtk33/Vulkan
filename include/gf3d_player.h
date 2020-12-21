@@ -21,4 +21,5 @@ void gf3d_player_grounded();
 void gf3d_player_air();
 float gf3d_detection();
 Vector3D location();
+void jumpoff();
 #endif

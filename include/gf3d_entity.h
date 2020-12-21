@@ -29,6 +29,7 @@ typedef struct Entity_S
 	int			type;
 	enum state ground;
 	float		cooldown;
+	enum state live;
 }Entity;
 
 void gf3d_entity_init(Uint32 maxEntities);

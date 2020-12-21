@@ -13,6 +13,8 @@
 #include "gf3d_entity.h"
 #include "gf3d_player.h"
 #include "gf3d_enemy.h"
+#include "gf3d_boss.h"
+
 #include "gf3d_gltf_load.h"
 
 
@@ -96,6 +98,13 @@ int main(int argc,char *argv[])
 	gfc_matrix_make_translation(
 		ent[7]->modelMatrix,
 		vector3d(20, -20, 5));
+	ent[8] = gf3d_entity_new();
+	ent[8]->model = gf3d_model_load("boss");
+	ent[8]->think = gf3d_boss_think;
+	gf3d_entity_set_colliders(ent[8], (float)0.5, (float)0.3, (float)3.2, (float)0.72, (float)0.5, (float)0);
+	gfc_matrix_make_translation(
+		ent[8]->modelMatrix,
+		vector3d(100, -75, 5));
 	/*ent[6] = gf3d_entity_new();
 	ent[6]->model = gf3d_model2_load("cube");
 	gfc_matrix_make_translation(
@@ -132,6 +141,7 @@ int main(int argc,char *argv[])
 		vector3d(1, 0, 0));
 	ent[6]->type = 2;
 	ent[6]->ground = no;
+	ent[6]->live = yes;
 	gfc_matrix_rotate(
 		ent[7]->modelMatrix,
 		ent[7]->modelMatrix,
@@ -139,6 +149,12 @@ int main(int argc,char *argv[])
 		vector3d(1, 0, 0));
 	ent[7]->type = 3;
 	ent[7]->ground = no;
+	ent[7]->live = yes;
+	gfc_matrix_rotate(
+		ent[8]->modelMatrix,
+		ent[8]->modelMatrix,
+		(float)1.5708,
+		vector3d(1, 0, 0));
 	//view = gf3d_vgraphics_get_view();
 	SDL_ShowCursor(0);
     SDL_SetRelativeMouseMode(SDL_TRUE);

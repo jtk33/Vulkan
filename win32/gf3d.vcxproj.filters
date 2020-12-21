@@ -221,5 +221,8 @@
     <ClCompile Include="..\src\gf3d_sprite.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\gf3d_boss.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 
 #include "simple_logger.h"
-
+#include "simple_json.h"
 #include "gf3d_player.h"
 
 #include "SDL_keycode.h"
@@ -600,4 +600,9 @@ float gf3d_detection()
 Vector3D location()
 {
 	return loc;
+}
+void jumpoff()
+{
+	airvelocity = player.jumpheight * 3;
+	djwait = 10;
 }
