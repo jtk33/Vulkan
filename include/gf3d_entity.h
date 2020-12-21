@@ -26,6 +26,9 @@ typedef struct Entity_S
 	enum state cannx;	/**Can it move on negative x?*/
 	enum state canny;	/**Can it move on negative y?*/
 	void		(*think)(struct Entity_S *self);
+	int			type;
+	enum state ground;
+	float		cooldown;
 }Entity;
 
 void gf3d_entity_init(Uint32 maxEntities);

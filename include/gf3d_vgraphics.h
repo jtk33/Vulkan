@@ -54,6 +54,13 @@ void gf3d_vgraphics_translate_camera_y(float distance);
 
 void gf3d_vgraphics_translate_camera_z(float distance);
 
+int rotatex();
+
+int rotatey();
+
+int mousex();
+
+int mousey();
 
 VkBuffer gf3d_vgraphics_get_uniform_buffer_by_index(Uint32 index);
 UniformBufferObject gf3d_vgraphics_get_uniform_buffer_object();

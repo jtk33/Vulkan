@@ -6,6 +6,7 @@
 #include "gf3d_commands.h"
 #include "gf3d_vgraphics.h"
 #include "gf3d_obj_load.h"
+#include "gf3d_gltf_load.h"
 
 typedef struct
 {
@@ -78,17 +79,45 @@ Model * gf3d_model_new()
 
 Model * gf3d_model_load(char * filename)
 {
-    TextLine assetname;
-    Model *model;
-    model = gf3d_model_new();
-    if (!model)return NULL;
-    snprintf(assetname,GFCLINELEN,"models/%s.obj",filename);
-    model->mesh = gf3d_mesh_load(assetname);
+	TextLine assetname;
+	Model *model;
+	model = gf3d_model_new();
+	if (!model)return NULL;
+	snprintf(assetname, GFCLINELEN, "models/%s.obj", filename);
+	model->mesh = gf3d_mesh_load(assetname);
 
-    snprintf(assetname,GFCLINELEN,"images/%s.png",filename);
-    model->texture = gf3d_texture_load(assetname);
-    
-    return model;
+	snprintf(assetname, GFCLINELEN, "images/%s.png", filename);
+	model->texture = gf3d_texture_load(assetname);
+
+	return model;
+}
+Model * gf3d_pmodel_load(Model *model, char * filename)
+{
+	TextLine assetname;
+	Model *nmodel;
+	if (!model)return NULL;
+	snprintf(assetname, GFCLINELEN, "models/%s.obj", filename);
+	model->mesh = gf3d_mesh_load(assetname);
+
+	snprintf(assetname, GFCLINELEN, "images/robo.png", filename);
+	model->texture = gf3d_texture_load(assetname);
+
+	return model;
+}
+
+Model * gf3d_model2_load(char * filename)
+{
+	TextLine assetname;
+	Model *model;
+	model = gf3d_model_new();
+	if (!model)return NULL;
+	snprintf(assetname, GFCLINELEN, "models/%s.glb", filename);
+	model->mesh = gf3d_mesh2_load(assetname);
+
+	snprintf(assetname, GFCLINELEN, "images/%s.png", filename);
+	model->texture = gf3d_texture_load(assetname);
+
+	return model;
 }
 
 void gf3d_model_free(Model *model)
@@ -116,7 +145,7 @@ void gf3d_model_draw(Model *model,Uint32 bufferFrame, VkCommandBuffer commandBuf
     VkDescriptorSet *descriptorSet = NULL;
     if (!model)
     {
-        slog("cannot render a NULL model");
+        //slog("cannot render a NULL model");
         return;
     }
     descriptorSet = gf3d_pipeline_get_descriptor_set(gf3d_model.pipe, bufferFrame);

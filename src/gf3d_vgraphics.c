@@ -24,6 +24,7 @@
 #include "gf3d_commands.h"
 #include "gf3d_texture.h"
 #include "gf3d_entity.h"
+#include "gf3d_camera.h"
 
 #include "SDL_keycode.h"
 
@@ -86,6 +87,12 @@ VkDeviceCreateInfo gf3d_vgraphics_get_device_info(Bool enableValidationLayers);
 
 void gf3d_vgraphics_debug_close();
 void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT callback, const VkAllocationCallbacks* pAllocator);
+
+double camrotate = 0;
+Vector2D cam;
+int x = 0;
+int y = 0;
+double camz = 0;
 
 void gf3d_vgraphics_setup(
     char *windowName,
@@ -693,61 +700,44 @@ void gf3d_vgraphics_rotate_camera_z(double degrees)
 
 }
 
-void gf3d_vgraphics_translate_camera_x(double distance)
-{
-	gfc_matrix_translate(
-		gf3d_vgraphics.ubo.view,
-		vector3d(distance, 0, 0));
-
-}
-
-void gf3d_vgraphics_translate_camera_y(double distance)
-{
-	gfc_matrix_translate(
-		gf3d_vgraphics.ubo.view,
-		vector3d(0, distance, 0));
-
-}
-
-void gf3d_vgraphics_translate_camera_z(double distance)
-{
-	gfc_matrix_translate(
-		gf3d_vgraphics.ubo.view,
-		vector3d(0, 0, distance));
-	/*gfc_matrix_view(
-		gf3d_vgraphics.ubo.view,
-		vector3d(2, 40, 2),
-		vector3d(0, 3, 0),
-		vector3d(0, 0, 1)
-		);*/
-
-}
 void gf3d_camera_think(Entity *self)
 {
-	/*if (keys[SDL_SCANCODE_D] && keys[SDL_SCANCODE_A])
+	SDL_GetRelativeMouseState(&x, &y);
+	camrotate -= x * GFC_DEGTORAD * 0.1;
+	camz += y * GFC_DEGTORAD * 0.5;
+	float s = SDL_sinf(camrotate - 2.35619);
+	float c = SDL_cosf(camrotate - 2.35619);
+	cam.x = ((-7 * c) - (-7 * s));
+	cam.y = ((-7 * s) + (-7 * c));
+	if (camz < -5)
 	{
-		gfc_matrix_view(
-			gf3d_vgraphics.ubo.view,
-			vector3d(gf3d_vgraphics.ubo.view[3][0], self->modelMatrix[3][1] + 9, self->modelMatrix[3][2] + 5),
-			vector3d(self->modelMatrix[3][0], self->modelMatrix[3][1], self->modelMatrix[3][2] + 3.6),
-			vector3d(0, 0, 1));
+		camz = -5;
 	}
-	else if (keys[SDL_SCANCODE_A])
+	if (camz > 4)
 	{
-		gf3d_vgraphics_rotate_camera_z((float)-0.01);
+		camz = 4;
 	}
-	else if (keys[SDL_SCANCODE_D])
-	{
-		gf3d_vgraphics_rotate_camera_z((float)0.01);
-	}
-	else*/
-	//{
-		gfc_matrix_view(
-			gf3d_vgraphics.ubo.view,
-			vector3d(self->modelMatrix[3][0], self->modelMatrix[3][1] + 9, self->modelMatrix[3][2] + 5),
-			vector3d(self->modelMatrix[3][0], self->modelMatrix[3][1], self->modelMatrix[3][2] + 3.6),
-			vector3d(0, 0, 1));
-	//}
+	gfc_matrix_view(
+		gf3d_vgraphics.ubo.view,
+		vector3d(cam.x + self->modelMatrix[3][0], cam.y + self->modelMatrix[3][1], camz + 6 + self->modelMatrix[3][2]),
+		vector3d(self->modelMatrix[3][0], self->modelMatrix[3][1], self->modelMatrix[3][2] + 3.6),
+		vector3d(0, 0, 1));
+}
+int rotatex()
+{
+	return cam.x;
+}
+int rotatey()
+{
+	return cam.y;
+}
+int mousex()
+{
+	return x;
+}
+int mousey()
+{
+	return y;
 }
 
 Pipeline *gf3d_vgraphics_get_graphics_pipeline()

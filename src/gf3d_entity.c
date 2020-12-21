@@ -3,6 +3,8 @@
 
 #include "gf3d_entity.h"
 #include "gf3d_player.h"
+#include "gf3d_enemy.h"
+
 
 typedef struct
 {
@@ -111,14 +113,20 @@ void gf3d_collision_think(Entity *self, Entity *other)
 	if (self->nx < other->x && self->x > other->nx && self->ny < other->y && self->y > other->ny && self->nz < other->z && self->z > other->nz)
 	{
 		collidercount = 3;
-		gf3d_player_grounded();
+		if (other->type == 1)
+			gf3d_player_grounded();
+		else if (other->type == 2)
+			other->ground = yes;
 	}
 	else
 	{
 		collidercount -= 1;
 		if (collidercount <= 0)
 		{
-			gf3d_player_air();
+			if (other->type == 1)
+				gf3d_player_air();
+			else if (other->type >= 2)
+				other->ground = no;
 			other->canx = yes;
 			other->cany = yes;
 			other->cannx = yes;
@@ -166,6 +174,7 @@ void gf3d_detector_think(Entity *self, Entity *other)
 				//gf3d_model_delete(self->model);
 				self->model = gf3d_model_load("detectorr");
 				hostile = 1;
+				gf3d_detect();
 			}
 			
 		}
@@ -174,6 +183,7 @@ void gf3d_detector_think(Entity *self, Entity *other)
 	{
 		self->model = gf3d_model_load("detectorg");
 		hostile = 0;
+		
 	}
 	
 	if (relook <= 0)

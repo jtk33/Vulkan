@@ -7,6 +7,7 @@
 #include "gf3d_obj_load.h"
 #include "gf3d_swapchain.h"
 #include "gf3d_commands.h"
+#include "gf3d_gltf_load.h"
 
 
 #define ATTRIBUTE_COUNT 3
@@ -269,4 +270,28 @@ Mesh *gf3d_mesh_load(char *filename)
     return mesh;
 }
 
+Mesh *gf3d_mesh2_load(char *filename)
+{
+	Mesh *mesh;
+	GLBData *glb;
+	mesh = gf3d_mesh_get_by_filename(filename);
+	if (mesh)return mesh;
+
+	glb = gf3d_glb_load_from_file(filename);
+
+	if (!glb)
+	{
+		return NULL;
+	}
+
+	mesh = gf3d_mesh_new();
+	if (!mesh)
+	{
+		return NULL;
+	}
+	gf3d_mesh_create_vertex_buffer_from_vertices(mesh, glb->faceVertices, glb->face_vert_count, glb->outFace, glb->face_count);
+	simple_glb_free(glb);
+	gfc_line_cpy(mesh->filename, filename);
+	return mesh;
+}
 /*eol@eof*/

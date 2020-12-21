@@ -33,6 +33,13 @@ float cloakwait;
 float boxwait;
 float tpwait;
 float originspeed;
+Vector2D angle;
+float theta;
+Vector2D direction;
+int x, y;
+Vector3D loc;
+int anim;
+int rev;
 void gf3d_player_init()
 {
 	if (player.form != NULL)
@@ -61,12 +68,114 @@ void gf3d_player_init()
 	tpwait = 1;
 	cantp = yes;
 	originspeed = player.speed;
+	loc.z = 5;
+	anim = 0;
+	rev = 0;
 }
-
+void respawn()
+{
+	loc.x = 0;
+	loc.y = 0;
+	loc.z = 5;
+	airvelocity = 0;
+	gf3d_lose();
+}
+void runnin(Entity *self)
+{
+	if (anim <= 500)
+	{
+		rev = 0;
+	}
+	if (anim >= 1450)
+	{
+		rev = 1;
+	}
+	if (rev == 0)
+	{
+		anim++;
+	}
+	if (rev == 1)
+	{
+		anim--;
+	}
+	if (anim < 100)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r1");
+	}
+	else if (anim < 200)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r2");
+	}
+	else if (anim < 300)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r3");
+	}
+	else if (anim < 400)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r4");
+	}
+	else if (anim < 500)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r5");
+	}
+	else if (anim < 600)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r6");
+	}
+	else if (anim < 700)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r7");
+	}
+	else if (anim < 800)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r8");
+	}
+	else if (anim < 900)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r9");
+	}
+	else if (anim < 1000)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r10");
+	}
+	else if (anim < 1100)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r11");
+	}
+	else if (anim < 1200)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r12");
+	}
+	else if (anim < 1300)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r13");
+	}
+	else if (anim < 1400)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r14");
+	}
+	else if (anim < 1500)
+	{
+		self->model = gf3d_pmodel_load(self->model, "run/r15");
+	}
+}
 void gf3d_player_think(Entity *self)
 {
 	if (!self)return;
 	gf3d_entity_set_colliders(self, (float)0.5, (float)0.3, (float)3.2, (float)0.72, (float)0.5, (float)0);
+	angle.x = rotatex();
+	angle.y = rotatey();
+	theta = atan2(angle.y, angle.x);
+	direction.x = cos(theta) * 2;
+	direction.y = sin(theta) * 2;
+	gfc_matrix_rotate(
+		self->modelMatrix,
+		self->modelMatrix,
+		-mousex() * GFC_DEGTORAD * 0.1,
+		vector3d(0, 1, 0));
+	self->modelMatrix[3][0] = loc.x;
+	self->modelMatrix[3][1] = loc.y;
+	self->modelMatrix[3][2] = loc.z;
 	if (player.form == platformer)
 	{
 		player.detection = 100;
@@ -194,21 +303,21 @@ void gf3d_player_think(Entity *self)
 			}
 		}
 	}
-	if (keys[SDL_SCANCODE_A])
+	if (keys[SDL_SCANCODE_A] && player.boxxed == no)
 	{
-		if (self->canx == yes)
+		if (self->canny == yes && self->canx == yes)
 		{
 			if (player.sprint == yes)
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(player.sprintspeed, 0, 0));
+					vector3d(direction.y * player.sprintspeed, -direction.x * player.sprintspeed, 0));
 			}
 			else
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(player.speed, 0, 0));
+					vector3d(direction.y * player.speed, -direction.x * player.speed, 0));
 			}
 		}
 		else
@@ -217,31 +326,32 @@ void gf3d_player_think(Entity *self)
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(-player.sprintspeed, 0, 0));
+					vector3d(-direction.y * player.sprintspeed, direction.x * player.sprintspeed, 0));
 			}
 			else
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(-player.speed, 0, 0));
+					vector3d(-direction.y * player.speed, direction.x * player.speed, 0));
 			}
 		}
+		runnin(self);
 	}
-	if (keys[SDL_SCANCODE_D])
+	if (keys[SDL_SCANCODE_D] && player.boxxed == no)
 	{
-		if (self->cannx == yes)
+		if (self->canny == yes && self->canx == yes)
 		{
 			if (player.sprint == yes)
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(-player.sprintspeed, 0, 0));
+					vector3d(-direction.y * player.sprintspeed, direction.x * player.sprintspeed, 0));
 			}
 			else
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(-player.speed, 0, 0));
+					vector3d(-direction.y * player.speed, direction.x * player.speed, 0));
 			}
 		}
 		else
@@ -250,32 +360,34 @@ void gf3d_player_think(Entity *self)
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(player.sprintspeed, 0, 0));
+					vector3d(direction.y * player.sprintspeed, -direction.x * player.sprintspeed, 0));
 			}
 			else
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(player.speed, 0, 0));
+					vector3d(direction.y * player.speed, -direction.x * player.speed, 0));
 			}
 		}
+		runnin(self);
 	}
-	if (keys[SDL_SCANCODE_S])
+	if (keys[SDL_SCANCODE_S] && player.boxxed == no)
 	{
-		if (self->cany == yes)
+		if (self->cany == yes && self->canx == yes)
 		{
 			if (player.sprint == yes)
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(0, player.sprintspeed, 0));
+					vector3d(direction.x * player.sprintspeed, direction.y * player.sprintspeed, 0));
 			}
 			else
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(0, player.speed, 0));
+					vector3d(direction.x * player.speed, direction.y * player.speed, 0));
 			}
+
 		}
 		else
 		{
@@ -283,31 +395,32 @@ void gf3d_player_think(Entity *self)
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(0, -player.sprintspeed, 0));
+					vector3d(-direction.x * player.sprintspeed, -direction.y * player.sprintspeed, 0));
 			}
 			else
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(0, -player.speed, 0));
+					vector3d(-direction.x * player.speed, -direction.y * player.speed, 0));
 			}
 		}
+		runnin(self);
 	}
-	if (keys[SDL_SCANCODE_W])
+	if (keys[SDL_SCANCODE_W] && player.boxxed == no)
 	{
-		if (self->canny == yes)
+		if (self->canny == yes && self->canx == yes)
 		{
 			if (player.sprint == yes)
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(0, -player.sprintspeed, 0));
+					vector3d(-direction.x * player.sprintspeed, -direction.y * player.sprintspeed, 0));
 			}
 			else
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(0, -player.speed, 0));
+					vector3d(-direction.x * player.speed, -direction.y * player.speed, 0));
 			}
 		}
 		else
@@ -316,15 +429,16 @@ void gf3d_player_think(Entity *self)
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(0, player.sprintspeed, 0));
+					vector3d(direction.x * player.sprintspeed, direction.y * player.sprintspeed, 0));
 			}
 			else
 			{
 				gfc_matrix_translate(
 					self->modelMatrix,
-					vector3d(0, player.speed, 0));
+					vector3d(direction.x * player.speed, direction.y * player.speed, 0));
 			}
 		}
+		runnin(self);
 
 	}
 	if (keys[SDL_SCANCODE_X])
@@ -355,7 +469,6 @@ void gf3d_player_think(Entity *self)
 	{
 		if (player.form == platformer)
 		{
-
 			if (keys[SDL_SCANCODE_A])
 			{
 				if (tpwait <= 0)
@@ -363,7 +476,7 @@ void gf3d_player_think(Entity *self)
 					tpwait = 1;
 					gfc_matrix_translate(
 						self->modelMatrix,
-						vector3d(player.tpdistance, 0, 0));
+						vector3d(direction.y * player.tpdistance, -direction.x * player.tpdistance, 0));
 					cantp = no;
 				}
 			}
@@ -374,7 +487,7 @@ void gf3d_player_think(Entity *self)
 					tpwait = 1;
 					gfc_matrix_translate(
 						self->modelMatrix,
-						vector3d(-player.tpdistance, 0, 0));
+						vector3d(-direction.y * player.tpdistance, direction.x * player.tpdistance, 0));
 					cantp = no;
 				}
 			}
@@ -385,7 +498,7 @@ void gf3d_player_think(Entity *self)
 					tpwait = 1;
 					gfc_matrix_translate(
 						self->modelMatrix,
-						vector3d(0, player.tpdistance, 0));
+						vector3d(direction.x * player.tpdistance, direction.y * player.tpdistance, 0));
 					cantp = no;
 				}
 			}
@@ -396,7 +509,7 @@ void gf3d_player_think(Entity *self)
 					tpwait = 1;
 					gfc_matrix_translate(
 						self->modelMatrix,
-						vector3d(0, -player.tpdistance, 0));
+						vector3d(-direction.x * player.tpdistance, -direction.y * player.tpdistance, 0));
 					cantp = no;
 				}
 			}
@@ -456,14 +569,21 @@ void gf3d_player_think(Entity *self)
 		airvelocity = player.jumpheight;
 		djwait = 10;
 	}
+	loc.x = self->modelMatrix[3][0];
+	loc.y = self->modelMatrix[3][1];
+	loc.z = self->modelMatrix[3][2];
 	if (self->modelMatrix[3][2] <= -100 || self->modelMatrix[3][1] <= -100 || self->modelMatrix[3][0] <= -100 || self->modelMatrix[3][2] >= 100 || self->modelMatrix[3][1] >= 100 || self->modelMatrix[3][0] >= 100)
 	{
-		self->modelMatrix[3][0] = 0;
-		self->modelMatrix[3][1] = 0;
-		self->modelMatrix[3][2] = 5;
-		airvelocity = 0;
+		respawn();
 	}
-	
+	if (!keys[SDL_SCANCODE_W] && !keys[SDL_SCANCODE_A] && !keys[SDL_SCANCODE_S] && !keys[SDL_SCANCODE_D] && player.boxxed == no)
+	{
+		anim = 0;
+		rev = 0;
+		self->model = gf3d_pmodel_load(self->model, "robo");
+	}
+
+
 }
 void gf3d_player_grounded()
 {
@@ -476,4 +596,8 @@ void gf3d_player_air()
 float gf3d_detection()
 {
 	return player.detection;
+}
+Vector3D location()
+{
+	return loc;
 }

@@ -5,6 +5,7 @@
 #include "gfc_matrix.h"
 #include "gf3d_model.h"
 #include "gf3d_entity.h"
+#include "gf3d_vgraphics.h"
 
 #include "SDL_keycode.h"
 #include "SDL_events.h"
@@ -19,4 +20,5 @@ void gf3d_player_think(Entity *self);
 void gf3d_player_grounded();
 void gf3d_player_air();
 float gf3d_detection();
+Vector3D location();
 #endif

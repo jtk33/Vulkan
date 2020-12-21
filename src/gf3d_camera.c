@@ -1,4 +1,5 @@
 #include "gfc_matrix.h"
+#include "simple_logger.h"
 
 #include <string.h>
 
@@ -43,5 +44,4 @@ void gf3d_camera_move(Vector3D move)
     gf3d_camera[1][3] += move.y;
     gf3d_camera[2][3] += move.z;
 }
-
 /*eol@eof*/

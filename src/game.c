@@ -12,6 +12,9 @@
 #include "gf3d_texture.h"
 #include "gf3d_entity.h"
 #include "gf3d_player.h"
+#include "gf3d_enemy.h"
+#include "gf3d_gltf_load.h"
+
 
 #include "SDL_keycode.h"
 #include "SDL_events.h"
@@ -77,14 +80,35 @@ int main(int argc,char *argv[])
 	ent[5]->model = gf3d_model_load("detectorg");
 	gfc_matrix_make_translation(
 		ent[5]->modelMatrix,
-		vector3d(-20, -10, 2));
-	gf3d_entity_set_colliders(ent[5], (float)2, (float)2, (float)2, (float)2, (float)2, (float)2);
+		vector3d(-30, -20, 5));
+	gf3d_entity_set_colliders(ent[5], (float)50, (float)15, (float)15, (float)15, (float)15, (float)15);
+	ent[6] = gf3d_entity_new();
+	ent[6]->model = gf3d_model_load("melee");
+	ent[6]->think = gf3d_enemy_think;
+	gf3d_entity_set_colliders(ent[6], (float)0.5, (float)0.3, (float)3.2, (float)0.72, (float)0.5, (float)0);
+	gfc_matrix_make_translation(
+		ent[6]->modelMatrix,
+		vector3d(-20, -20, 5));
+	ent[7] = gf3d_entity_new();
+	ent[7]->model = gf3d_model_load("shooter");
+	ent[7]->think = gf3d_enemy_think;
+	gf3d_entity_set_colliders(ent[7], (float)0.5, (float)0.3, (float)3.2, (float)0.72, (float)0.5, (float)0);
+	gfc_matrix_make_translation(
+		ent[7]->modelMatrix,
+		vector3d(20, -20, 5));
+	/*ent[6] = gf3d_entity_new();
+	ent[6]->model = gf3d_model2_load("cube");
+	gfc_matrix_make_translation(
+		ent[6]->modelMatrix,
+		vector3d(0, 0, 0));
+	gf3d_entity_set_colliders(ent[6], (float)2, (float)2, (float)2, (float)2, (float)2, (float)2);*/
 	gf3d_player_init();
 	gfc_matrix_rotate(
 		ent[0]->modelMatrix,
 		ent[0]->modelMatrix,
 		(float)1.5708,
 		vector3d(1, 0, 0));
+	ent[0]->type = 1;
 	gfc_matrix_rotate(
 		ent[2]->modelMatrix,
 		ent[2]->modelMatrix,
@@ -100,10 +124,24 @@ int main(int argc,char *argv[])
 		ent[4]->modelMatrix,
 		(float)1.5708,
 		vector3d(1, 0, 0));
-
-
+	gf3d_enemy_init();
+	gfc_matrix_rotate(
+		ent[6]->modelMatrix,
+		ent[6]->modelMatrix,
+		(float)1.5708,
+		vector3d(1, 0, 0));
+	ent[6]->type = 2;
+	ent[6]->ground = no;
+	gfc_matrix_rotate(
+		ent[7]->modelMatrix,
+		ent[7]->modelMatrix,
+		(float)1.5708,
+		vector3d(1, 0, 0));
+	ent[7]->type = 3;
+	ent[7]->ground = no;
 	//view = gf3d_vgraphics_get_view();
-
+	SDL_ShowCursor(0);
+    SDL_SetRelativeMouseMode(SDL_TRUE);
     while(!done)
     {
         SDL_PumpEvents();   // update SDL's internal event structures
@@ -114,6 +152,9 @@ int main(int argc,char *argv[])
 		gf3d_collision_think(ent[2], ent[0]);
 		gf3d_collision_think(ent[3], ent[0]);
 		gf3d_collision_think(ent[4], ent[0]);
+		gf3d_collision_think(ent[2], ent[6]);
+		gf3d_collision_think(ent[3], ent[6]);
+		gf3d_collision_think(ent[4], ent[6]);
 		gf3d_detector_think(ent[5], ent[0]);
 
 
